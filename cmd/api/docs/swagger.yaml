@@ -1,0 +1,91 @@
+basePath: /
+definitions:
+  loadtest.runRequest:
+    properties:
+      duration_seconds:
+        type: integer
+      requests_per_second:
+        type: integer
+      target_url:
+        type: string
+    required:
+    - duration_seconds
+    - requests_per_second
+    - target_url
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: Load runner e alvo simulado para estudo de observabilidade
+  title: Go Observability Lab API
+  version: "1.0"
+paths:
+  /load-test/{id}/results:
+    get:
+      parameters:
+      - description: Test ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Consulta resultado de um teste
+      tags:
+      - load-test
+  /load-test/run:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Configuração do teste
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/loadtest.runRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inicia um teste de carga
+      tags:
+      - load-test
+  /target/ping:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      summary: Endpoint alvo para testes de carga
+      tags:
+      - target
+swagger: "2.0"

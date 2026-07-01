@@ -16,7 +16,6 @@ type runRequest struct {
 	DurationSeconds   int    `json:"duration_seconds" binding:"required,gt=0"`
 }
 
-// store em memória dos resultados, indexado por test ID.
 var (
 	resultsMu sync.RWMutex
 	results   = make(map[string]*Result)
@@ -28,6 +27,16 @@ func RegisterRoutes(router *gin.Engine) {
 	router.GET("/load-test/:id/results", handleResults)
 }
 
+// handleRun inicia um novo teste de carga
+//
+//	@Summary	Inicia um teste de carga
+//	@Tags		load-test
+//	@Accept		json
+//	@Produce	json
+//	@Param		request	body		runRequest	true	"Configuração do teste"
+//	@Success	202		{object}	map[string]string
+//	@Failure	400		{object}	map[string]string
+//	@Router		/load-test/run [post]
 func handleRun(c *gin.Context) {
 	var req runRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,7 +52,6 @@ func handleRun(c *gin.Context) {
 		Duration:          time.Duration(req.DurationSeconds) * time.Second,
 	}
 
-	// Dispara o teste em background - a resposta HTTP não espera terminar.
 	go func() {
 		result := Run(cfg)
 		resultsMu.Lock()
@@ -57,6 +65,15 @@ func handleRun(c *gin.Context) {
 	})
 }
 
+// handleResults consulta o resultado de um teste de carga
+//
+//	@Summary	Consulta resultado de um teste
+//	@Tags		load-test
+//	@Produce	json
+//	@Param		id	path		string	true	"Test ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]string
+//	@Router		/load-test/{id}/results [get]
 func handleResults(c *gin.Context) {
 	testID := c.Param("id")
 
