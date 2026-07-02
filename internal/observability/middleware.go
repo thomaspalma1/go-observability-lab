@@ -38,7 +38,7 @@ func RequestLogger(logger *slog.Logger) gin.HandlerFunc {
 			slog.String("method", c.Request.Method),
 			slog.String("path", c.FullPath()),
 			slog.Int("status", c.Writer.Status()),
-			slog.Duration("duration", duration),
+			slog.String("duration", duration.String()),
 			slog.String("client_ip", c.ClientIP()),
 		)
 	}
