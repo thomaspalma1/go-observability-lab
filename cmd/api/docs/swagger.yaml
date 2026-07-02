@@ -20,6 +20,20 @@ info:
   title: Go Observability Lab API
   version: "1.0"
 paths:
+  /healthz:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Liveness probe
+      tags:
+      - health
   /load-test/{id}/results:
     get:
       parameters:
@@ -74,6 +88,24 @@ paths:
       summary: Inicia um teste de carga
       tags:
       - load-test
+  /readyz:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Readiness probe
+      tags:
+      - health
   /target/ping:
     get:
       produces:
