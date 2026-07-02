@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -26,11 +27,13 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(observability.RequestID())
 	router.Use(observability.RequestLogger(logger))
+	router.Use(observability.Metrics())
 
 	health.RegisterRoutes(router, loadtest.ActiveTests)
 	target.RegisterRoutes(router)
 	loadtest.RegisterRoutes(router)
 
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err := router.Run(":8082"); err != nil {
