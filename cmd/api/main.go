@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/thomaspalma1/go-observability-lab/cmd/api/docs"
 	"github.com/thomaspalma1/go-observability-lab/internal/loadtest"
+	"github.com/thomaspalma1/go-observability-lab/internal/observability"
 	"github.com/thomaspalma1/go-observability-lab/internal/target"
 )
 
@@ -18,7 +19,12 @@ import (
 // @host			localhost:8082
 // @BasePath		/
 func main() {
-	router := gin.Default()
+	logger := observability.NewLogger()
+
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(observability.RequestID())
+	router.Use(observability.RequestLogger(logger))
 
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
