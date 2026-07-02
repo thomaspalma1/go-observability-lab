@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	_ "github.com/thomaspalma1/go-observability-lab/cmd/api/docs"
 	"github.com/thomaspalma1/go-observability-lab/internal/health"
@@ -21,6 +23,14 @@ import (
 // @host			localhost:8082
 // @BasePath		/
 func main() {
+	ctx := context.Background()
+
+	shutdown, err := observability.InitTracer(ctx, "go-observability-lab", "jaeger:4317")
+	if err != nil {
+		log.Fatalf("failed to init tracer: %v", err)
+	}
+	defer shutdown(ctx)
+
 	logger := observability.NewLogger()
 
 	router := gin.New()
@@ -28,6 +38,7 @@ func main() {
 	router.Use(observability.RequestID())
 	router.Use(observability.RequestLogger(logger))
 	router.Use(observability.Metrics())
+	router.Use(otelgin.Middleware("go-observability-lab"))
 
 	health.RegisterRoutes(router, loadtest.ActiveTests)
 	target.RegisterRoutes(router)
