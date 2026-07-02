@@ -3,6 +3,7 @@ package loadtest
 import (
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,15 @@ type runRequest struct {
 var (
 	resultsMu sync.RWMutex
 	results   = make(map[string]*Result)
+
+	activeTests atomic.Int64
 )
+
+// ActiveTests retorna quantos testes de carga estão rodando neste momento.
+// Usado pelo readiness check para refletir a saúde interna do processo.
+func ActiveTests() int64 {
+	return activeTests.Load()
+}
 
 // RegisterRoutes registra as rotas do load runner.
 func RegisterRoutes(router *gin.Engine) {
@@ -52,7 +61,11 @@ func handleRun(c *gin.Context) {
 		Duration:          time.Duration(req.DurationSeconds) * time.Second,
 	}
 
+	activeTests.Add(1)
+
 	go func() {
+		defer activeTests.Add(-1)
+
 		result := Run(cfg)
 		resultsMu.Lock()
 		results[testID] = result

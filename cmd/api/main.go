@@ -8,6 +8,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/thomaspalma1/go-observability-lab/cmd/api/docs"
+	"github.com/thomaspalma1/go-observability-lab/internal/health"
 	"github.com/thomaspalma1/go-observability-lab/internal/loadtest"
 	"github.com/thomaspalma1/go-observability-lab/internal/observability"
 	"github.com/thomaspalma1/go-observability-lab/internal/target"
@@ -26,10 +27,7 @@ func main() {
 	router.Use(observability.RequestID())
 	router.Use(observability.RequestLogger(logger))
 
-	router.GET("/healthz", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
-
+	health.RegisterRoutes(router, loadtest.ActiveTests)
 	target.RegisterRoutes(router)
 	loadtest.RegisterRoutes(router)
 
