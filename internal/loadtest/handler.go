@@ -1,6 +1,7 @@
 package loadtest
 
 import (
+	"context"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -61,12 +62,17 @@ func handleRun(c *gin.Context) {
 		Duration:          time.Duration(req.DurationSeconds) * time.Second,
 	}
 
+	// WithoutCancel preserva o trace_id da requisição original, mas remove
+	// o cancelamento automático - necessário porque o teste de carga
+	// continua rodando em background, depois da resposta HTTP já ter voltado.
+	ctx := context.WithoutCancel(c.Request.Context())
+
 	activeTests.Add(1)
 
 	go func() {
 		defer activeTests.Add(-1)
 
-		result := Run(cfg)
+		result := Run(ctx, cfg)
 		resultsMu.Lock()
 		results[testID] = result
 		resultsMu.Unlock()
@@ -101,8 +107,8 @@ func handleResults(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"test_id":        testID,
-		"total_requests": result.TotalRequests,
-		"successful":     result.Successful,
-		"failed":         result.Failed,
+		"total_requests": result.TotalRequests.Load(),
+		"successful":     result.Successful.Load(),
+		"failed":         result.Failed.Load(),
 	})
 }

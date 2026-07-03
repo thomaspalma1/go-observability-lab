@@ -1,17 +1,25 @@
 package loadtest
 
 import (
+	"context"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
+
+var tracer = otel.Tracer("go-observability-lab/loadtest")
 
 // Result guarda os números agregados de uma execução de teste de carga.
 type Result struct {
-	TotalRequests int64
-	Successful    int64
-	Failed        int64
+	TotalRequests atomic.Int64
+	Successful    atomic.Int64
+	Failed        atomic.Int64
 
 	mu        sync.Mutex
 	latencies []time.Duration
@@ -26,7 +34,16 @@ type Config struct {
 
 // Run dispara requisições HTTP contra TargetURL, tentando manter o ritmo de
 // RequestsPerSecond, durante Duration. Bloqueia até o teste terminar.
-func Run(cfg Config) *Result {
+func Run(ctx context.Context, cfg Config) *Result {
+	ctx, span := tracer.Start(ctx, "loadtest.run",
+		trace.WithAttributes(
+			attribute.String("target.url", cfg.TargetURL),
+			attribute.Int("requests_per_second", cfg.RequestsPerSecond),
+			attribute.String("duration", cfg.Duration.String()),
+		),
+	)
+	defer span.End()
+
 	result := &Result{}
 
 	interval := time.Second / time.Duration(cfg.RequestsPerSecond)
@@ -42,32 +59,57 @@ func Run(cfg Config) *Result {
 		select {
 		case <-stop:
 			wg.Wait()
+			span.SetAttributes(
+				attribute.Int64("requests.total", result.TotalRequests.Load()),
+				attribute.Int64("requests.successful", result.Successful.Load()),
+				attribute.Int64("requests.failed", result.Failed.Load()),
+			)
 			return result
 		case <-ticker.C:
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				fireRequest(client, cfg.TargetURL, result)
+				fireRequest(ctx, client, cfg.TargetURL, result)
 			}()
 		}
 	}
 }
 
-func fireRequest(client *http.Client, url string, result *Result) {
+func fireRequest(ctx context.Context, client *http.Client, url string, result *Result) {
+	_, span := tracer.Start(ctx, "loadtest.fire_request",
+		trace.WithAttributes(
+			attribute.String("http.url", url),
+		),
+	)
+	defer span.End()
+
 	start := time.Now()
 	resp, err := client.Get(url)
 	elapsed := time.Since(start)
+
+	span.SetAttributes(attribute.String("http.duration", elapsed.String()))
 
 	result.mu.Lock()
 	result.latencies = append(result.latencies, elapsed)
 	result.mu.Unlock()
 
-	atomic.AddInt64(&result.TotalRequests, 1)
+	result.TotalRequests.Add(1)
 
-	if err != nil || resp.StatusCode >= http.StatusInternalServerError {
-		atomic.AddInt64(&result.Failed, 1)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		result.Failed.Add(1)
 		return
 	}
 	defer resp.Body.Close()
-	atomic.AddInt64(&result.Successful, 1)
+
+	span.SetAttributes(attribute.Int("http.status_code", resp.StatusCode))
+
+	if resp.StatusCode >= http.StatusInternalServerError {
+		span.SetStatus(codes.Error, "server error")
+		result.Failed.Add(1)
+		return
+	}
+
+	result.Successful.Add(1)
 }
