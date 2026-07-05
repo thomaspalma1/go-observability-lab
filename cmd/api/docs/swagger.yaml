@@ -108,6 +108,11 @@ paths:
       - health
   /target/ping:
     get:
+      parameters:
+      - description: Atraso artificial em milissegundos
+        in: query
+        name: delay_ms
+        type: integer
       produces:
       - application/json
       responses:

@@ -156,6 +156,14 @@ const docTemplate = `{
                     "target"
                 ],
                 "summary": "Endpoint alvo para testes de carga",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Atraso artificial em milissegundos",
+                        "name": "delay_ms",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
