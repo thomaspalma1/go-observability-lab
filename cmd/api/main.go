@@ -43,6 +43,7 @@ func main() {
 	health.RegisterRoutes(router, loadtest.ActiveTests)
 	target.RegisterRoutes(router)
 	loadtest.RegisterRoutes(router)
+	observability.RegisterPprof(router)
 
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
