@@ -6,7 +6,7 @@
    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/swagger/swagger-original.svg" width="50" height="50"/>
 </p>
 
-A Go study lab focused entirely on observability. The API itself (a "load runner" that fires load against a target endpoint) has an intentionally simple domain; the real goal of this project is to serve as a controlled environment for exploring structured logging, metrics, distributed tracing, health checks, SLOs, and profiling, all running in a local stack via Docker Compose.
+A **Go** study lab focused entirely on observability. The API itself (a "load runner" that fires load against a target endpoint) has an intentionally simple domain; the real goal of this project is to serve as a controlled environment for exploring structured logging, metrics, distributed tracing, health checks, SLOs, and profiling, all running in a local stack via Docker Compose.
 
 ## Architecture
 
@@ -14,6 +14,7 @@ The service has two internal responsibilities:
 
 - **Load Runner**: fires HTTP requests against a configurable URL, at a configurable rate (`requests_per_second`) and duration, aggregating the results (success, failure, latency).
 - **Target**: a simple endpoint (`/target/ping`) that serves as the target for load tests, with support for artificial delay via query param, used to simulate slowness and test SLOs.
+```yaml
 Client → API (Gin)
 ├── /load-test/run    → fires load (goroutines + HTTP client)
 ├── /load-test/{id}/results
@@ -22,6 +23,7 @@ Client → API (Gin)
 ├── /metrics          → Prometheus
 ├── /debug/pprof/*    → native Go profiling
 └── /swagger/*        → interactive documentation
+```
 
 ## Observability stack
 
@@ -61,7 +63,7 @@ Native Go endpoints (`/debug/pprof/*`) exposed through Gin, allowing CPU, heap, 
 
 ## How to run
 
-```bash
+```yaml
 docker compose -f deploy/docker-compose.yml up --build
 ```
 
@@ -77,14 +79,14 @@ docker compose -f deploy/docker-compose.yml up --build
 ## Usage example
 
 Fire a load test:
-```bash
+```yaml
 curl -X POST http://localhost:8082/load-test/run \
   -H "Content-Type: application/json" \
   -d '{"target_url": "http://api:8082/target/ping", "requests_per_second": 50, "duration_seconds": 30}'
 ```
 
 Check the results:
-```bash
+```yaml
 curl http://localhost:8082/load-test/{test_id}/results
 ```
 
@@ -100,6 +102,8 @@ curl -X POST http://localhost:8082/load-test/run \
 A CPU profile captured during a sustained load test (200 req/s) showed that over 50% of CPU time was spent in `Syscall6` (a generic Linux syscall used internally for network I/O), rather than in application code. This confirms that, under this workload, the load runner's bottleneck is network I/O, not CPU processing in the Go application itself.
 
 ## Project structure
+
+```yaml
 .
 ├── cmd/api/                  # entry point, sets up the router and starts the server
 ├── internal/
@@ -112,10 +116,10 @@ A CPU profile captured during a sustained load test (200 req/s) showed that over
 ├── prometheus/             # config + SLO/alert rules
 ├── alertmanager/
 └── grafana/                # datasource + dashboard provisioning
-
+```
 ## Tech stack
 
-- **Go** + [Gin](https://github.com/gin-gonic/gin)
+- **Go** with [Gin](https://github.com/gin-gonic/gin)
 - **Prometheus** (`client_golang`) for metrics
 - **OpenTelemetry** for tracing (exported via OTLP/gRPC)
 - **swaggo** for OpenAPI/Swagger documentation
