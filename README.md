@@ -128,3 +128,9 @@ A **CPU profile** captured during a sustained load test (**200 req/s**) showed t
 - **OpenTelemetry** for **tracing** (exported via **OTLP/gRPC**)
 - **swaggo** for **OpenAPI/Swagger** documentation
 - **Docker Compose** orchestrating the whole stack locally
+
+## Dashboards
+
+| Grafana | Prometheus |
+|----------|------------|
+| ![Grafana Dashboard](./images/grafana.png) | ![Prometheus Dashboard](./images/prometheus.png) |
