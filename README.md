@@ -15,16 +15,15 @@ The service has two internal responsibilities:
 - **Load Runner**: fires HTTP requests against a configurable URL, at a configurable rate (`requests_per_second`) and duration, aggregating the results (**success**, **failure**, **latency**).
 - **Target**: a simple endpoint (`/target/ping`) that serves as the target for load tests, with support for artificial delay via query param, used to simulate slowness and test **SLOs**.
 
-```yaml
-Client → API (Gin)
-├── /load-test/run    → fires load (goroutines + HTTP client)
-├── /load-test/{id}/results
-├── /target/ping      → load test target (optional delay_ms)
-├── /healthz, /readyz
-├── /metrics          → Prometheus
-├── /debug/pprof/*    → native Go profiling
-└── /swagger/*        → interactive documentation
-```
+| Endpoint | Purpose |
+|----------|---------|
+| `/load-test/run` | Fires load (**goroutines + HTTP client**) |
+| `/load-test/{id}/results` | Returns the results of a load test |
+| `/target/ping` | Load test target (**optional `delay_ms`**) |
+| `/healthz`, `/readyz` | Liveness and readiness endpoints |
+| `/metrics` | Exposes **Prometheus** metrics |
+| `/debug/pprof/*` | Native **Go** profiling endpoints |
+| `/swagger/*` | Interactive **Swagger** documentation |
 
 ## **Observability stack**
 
