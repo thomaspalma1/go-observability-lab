@@ -1,7 +1,6 @@
 groups:
   - name: slo_target_ping
     rules:
-      # Proporção de requisições que violaram o objetivo de latência (>50ms)
       - record: slo:target_ping:error_ratio5m
         expr: >
           1 - (
@@ -10,11 +9,9 @@ groups:
             sum(rate(http_request_duration_seconds_count{path="/target/ping"}[5m]))
           )
 
-      # Burn rate: quantas vezes mais rápido que o sustentável (5% de budget)
       - record: slo:target_ping:burn_rate5m
         expr: slo:target_ping:error_ratio5m / 0.05
 
-    # separado em outro grupo por convenção, mas pode ficar junto
   - name: slo_target_ping_alerts
     rules:
       - alert: TargetPingSLOBurnRateHigh
@@ -24,4 +21,4 @@ groups:
           severity: warning
         annotations:
           summary: "Burn rate alto no SLO do /target/ping"
-          description: "Consumindo o error budget {{ $value | printf \"%.1f\" }}x mais rápido que o sustentável nos últimos 5 minutos."
+          description: "Consumindo o error budget {{ $value | printf `%.1f` }}x mais rápido que o sustentável nos últimos 5 minutos."
