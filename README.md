@@ -129,8 +129,14 @@ A **CPU profile** captured during a sustained load test (**200 req/s**) showed t
 - **swaggo** for **OpenAPI/Swagger** documentation
 - **Docker Compose** orchestrating the whole stack locally
 
-## Dashboards
+## Grafana
 
-| Grafana | Prometheus |
-|----------|------------|
-| ![Grafana Dashboard](./images/grafana.png) | ![Prometheus Dashboard](./images/prometheus.png) |
+<p align="center">
+  <img src="./images/grafana.png" alt="Grafana Dashboard" width="900">
+</p>
+
+## Prometheus
+
+<p align="center">
+  <img src="./images/prometheus.png" alt="Prometheus Dashboard" width="900">
+</p>
