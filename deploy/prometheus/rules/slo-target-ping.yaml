@@ -20,5 +20,5 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Burn rate alto no SLO do /target/ping"
-          description: "Consumindo o error budget {{ $value | printf `%.1f` }}x mais rápido que o sustentável nos últimos 5 minutos."
+          summary: "High SLO burn rate for /target/ping"
+          description: "Consuming the error budget {{ $value | printf `%.1f` }}x faster than the sustainable rate over the last 5 minutes."
