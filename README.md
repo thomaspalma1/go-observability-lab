@@ -132,17 +132,23 @@ A **CPU profile** captured during a sustained load test (**200 req/s**) showed t
 ## Grafana
 
 <p align="justify">
-  <img src="./images/grafana.png" alt="Grafana Dashboard" width="900">
+  <img src="./images/grafana.png" alt="Grafana" width="900">
 </p>
 
 ## Prometheus
 
 <p align="justify">
-  <img src="./images/prometheus.png" alt="Prometheus Dashboard" width="900">
+  <img src="./images/prometheus.png" alt="Prometheus" width="900">
+</p>
+
+## Alertmanager
+
+<p align="justify">
+  <img src="./images/alertmanager.png" alt="Alertmanager" width="900">
 </p>
 
 ## Jaeger
 
 <p align="justify">
-  <img src="./images/jaeger.png" alt="Jaeger Dashboard" width="900">
+  <img src="./images/jaeger.png" alt="Jaeger" width="900">
 </p>
