@@ -19,7 +19,7 @@ import (
 
 // @title			Go Observability Lab API
 // @version		1.0
-// @description	Load runner e alvo simulado para estudo de observabilidade
+// @description	Load generator and simulated target for observability studies.
 // @host			localhost:8082
 // @BasePath		/
 func main() {

@@ -11,8 +11,9 @@ import (
 const requestIDHeader = "X-Request-ID"
 const requestIDKey = "request_id"
 
-// RequestID gera um ID único por requisição, expõe no header de resposta
-// e disponibiliza no contexto do Gin para outros middlewares/handlers usarem.
+// RequestID generates a unique ID for each incoming request, exposes it in the
+// response header, and stores it in the Gin context so it can be used by other
+// middlewares and handlers.
 func RequestID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := uuid.NewString()
@@ -22,13 +23,13 @@ func RequestID() gin.HandlerFunc {
 	}
 }
 
-// RequestLogger loga cada requisição em JSON, incluindo o request_id,
-// método, rota, status e duração.
+// RequestLogger logs every HTTP request as a JSON record, including the
+// request ID, method, route, response status, request duration, and client IP.
 func RequestLogger(logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 
-		c.Next() // processa a requisição
+		c.Next() // Process the request.
 
 		duration := time.Since(start)
 		requestID, _ := c.Get(requestIDKey)

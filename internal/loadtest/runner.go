@@ -15,7 +15,7 @@ import (
 
 var tracer = otel.Tracer("go-observability-lab/loadtest")
 
-// Result guarda os números agregados de uma execução de teste de carga.
+// Result stores the aggregated metrics collected during a load test execution.
 type Result struct {
 	TotalRequests atomic.Int64
 	Successful    atomic.Int64
@@ -25,15 +25,17 @@ type Result struct {
 	latencies []time.Duration
 }
 
-// Config define os parâmetros de uma execução de teste de carga.
+// Config defines the parameters of a load test execution.
 type Config struct {
 	TargetURL         string
 	RequestsPerSecond int
 	Duration          time.Duration
 }
 
-// Run dispara requisições HTTP contra TargetURL, tentando manter o ritmo de
-// RequestsPerSecond, durante Duration. Bloqueia até o teste terminar.
+// Run sends HTTP requests to the target URL while attempting to maintain the
+// configured requests-per-second rate for the specified duration.
+//
+// The function blocks until the load test has completed.
 func Run(ctx context.Context, cfg Config) *Result {
 	ctx, span := tracer.Start(ctx, "loadtest.run",
 		trace.WithAttributes(
@@ -75,6 +77,8 @@ func Run(ctx context.Context, cfg Config) *Result {
 	}
 }
 
+// fireRequest performs a single HTTP request and records its outcome,
+// latency, and tracing information.
 func fireRequest(ctx context.Context, client *http.Client, url string, result *Result) {
 	_, span := tracer.Start(ctx, "loadtest.fire_request",
 		trace.WithAttributes(

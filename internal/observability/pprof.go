@@ -6,9 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterPprof expõe os endpoints padrão do net/http/pprof através do
-// router do Gin. Útil apenas em ambiente de estudo/debug - nunca deveria
-// ficar exposto publicamente em produção sem proteção de acesso.
+// RegisterPprof exposes the standard net/http/pprof endpoints through the Gin
+// router.
+//
+// This is intended only for development, debugging, and learning purposes.
+// These endpoints should never be exposed publicly in production without
+// appropriate access controls.
 func RegisterPprof(router *gin.Engine) {
 	debug := router.Group("/debug/pprof")
 	{

@@ -11,13 +11,13 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-// InitTracer configura o OpenTelemetry para exportar spans via OTLP (gRPC)
-// para o endpoint informado (ex: "jaeger:4317"), e retorna uma função de
-// shutdown que deve ser chamada quando a aplicação for encerrada.
+// InitTracer configures OpenTelemetry to export spans via OTLP (gRPC)
+// to the specified endpoint (e.g. "jaeger:4317"), and returns a shutdown
+// function that should be called when the application exits.
 func InitTracer(ctx context.Context, serviceName, otlpEndpoint string) (func(context.Context) error, error) {
 	exporter, err := otlptracegrpc.New(ctx,
 		otlptracegrpc.WithEndpoint(otlpEndpoint),
-		otlptracegrpc.WithInsecure(), // sem TLS, ambiente local
+		otlptracegrpc.WithInsecure(), // no TLS, local environment
 	)
 	if err != nil {
 		return nil, err

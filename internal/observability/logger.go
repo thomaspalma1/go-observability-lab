@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// NewLogger cria um logger estruturado que escreve em JSON no stdout.
+// NewLogger creates a structured logger that writes JSON logs to stdout.
 func NewLogger() *slog.Logger {
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,

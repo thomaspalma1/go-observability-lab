@@ -22,15 +22,18 @@ func TestRun_FiresRequestsAgainstTarget(t *testing.T) {
 	result := Run(cfg)
 
 	if result.TotalRequests == 0 {
-		t.Fatal("esperava pelo menos uma requisição disparada, mas não disparou nenhuma")
+		t.Fatal("expected at least one request to be sent, but none were executed")
 	}
 
 	if result.Failed > 0 {
-		t.Errorf("esperava zero falhas contra um alvo saudável, mas teve %d", result.Failed)
+		t.Errorf("expected zero failures against a healthy target, but got %d", result.Failed)
 	}
 
 	if result.Successful != result.TotalRequests {
-		t.Errorf("esperava que todas as requisições fossem bem-sucedidas: total=%d sucesso=%d",
-			result.TotalRequests, result.Successful)
+		t.Errorf(
+			"expected all requests to succeed: total=%d successful=%d",
+			result.TotalRequests,
+			result.Successful,
+		)
 	}
 }

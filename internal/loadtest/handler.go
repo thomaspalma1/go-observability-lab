@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// runRequest é o corpo esperado em POST /load-test/run
+// runRequest represents the payload expected by POST /load-test/run.
 type runRequest struct {
 	TargetURL         string `json:"target_url" binding:"required"`
 	RequestsPerSecond int    `json:"requests_per_second" binding:"required,gt=0"`
@@ -25,25 +25,27 @@ var (
 	activeTests atomic.Int64
 )
 
-// ActiveTests retorna quantos testes de carga estão rodando neste momento.
-// Usado pelo readiness check para refletir a saúde interna do processo.
+// ActiveTests returns the number of load tests currently running.
+//
+// This is used by the readiness probe to expose the internal health state
+// of the service.
 func ActiveTests() int64 {
 	return activeTests.Load()
 }
 
-// RegisterRoutes registra as rotas do load runner.
+// RegisterRoutes registers the load runner endpoints.
 func RegisterRoutes(router *gin.Engine) {
 	router.POST("/load-test/run", handleRun)
 	router.GET("/load-test/:id/results", handleResults)
 }
 
-// handleRun inicia um novo teste de carga
+// handleRun starts a new load test.
 //
-//	@Summary	Inicia um teste de carga
+//	@Summary	Start a load test
 //	@Tags		load-test
 //	@Accept		json
 //	@Produce	json
-//	@Param		request	body		runRequest	true	"Configuração do teste"
+//	@Param		request	body		runRequest	true	"Load test configuration"
 //	@Success	202		{object}	map[string]string
 //	@Failure	400		{object}	map[string]string
 //	@Router		/load-test/run [post]
@@ -62,9 +64,9 @@ func handleRun(c *gin.Context) {
 		Duration:          time.Duration(req.DurationSeconds) * time.Second,
 	}
 
-	// WithoutCancel preserva o trace_id da requisição original, mas remove
-	// o cancelamento automático - necessário porque o teste de carga
-	// continua rodando em background, depois da resposta HTTP já ter voltado.
+	// WithoutCancel preserves the trace context from the original request
+	// while removing its cancellation signal. This allows the load test to
+	// continue running in the background after the HTTP response has been sent.
 	ctx := context.WithoutCancel(c.Request.Context())
 
 	activeTests.Add(1)
@@ -84,9 +86,9 @@ func handleRun(c *gin.Context) {
 	})
 }
 
-// handleResults consulta o resultado de um teste de carga
+// handleResults retrieves the result of a previously started load test.
 //
-//	@Summary	Consulta resultado de um teste
+//	@Summary	Get load test results
 //	@Tags		load-test
 //	@Produce	json
 //	@Param		id	path		string	true	"Test ID"
@@ -101,7 +103,9 @@ func handleResults(c *gin.Context) {
 	resultsMu.RUnlock()
 
 	if !found {
-		c.JSON(http.StatusNotFound, gin.H{"error": "test not found or still running"})
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "test not found or still running",
+		})
 		return
 	}
 

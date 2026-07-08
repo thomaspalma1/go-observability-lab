@@ -6,25 +6,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// maxConcurrentTests define o limite de testes de carga simultâneos que
-// consideramos "saudável". Acima disso, o serviço se reporta como não-pronto.
+// maxConcurrentTests defines the maximum number of concurrent load tests
+// considered healthy. If this threshold is exceeded, the service reports
+// itself as not ready.
 const maxConcurrentTests = 3
 
-// activeTestsFunc é o tipo da função usada para consultar testes ativos.
-// Definido como tipo para facilitar testes e evitar acoplamento direto ao
-// pacote loadtest.
+// activeTestsFunc represents the function used to retrieve the current number
+// of active load tests. It is defined as a type to simplify testing and avoid
+// coupling this package directly to the loadtest package.
 type activeTestsFunc func() int64
 
-// RegisterRoutes registra as rotas de liveness e readiness.
+// RegisterRoutes registers the liveness and readiness endpoints.
 //
-// getActiveTests é injetado de fora (main.go) para evitar que o pacote
-// health precise importar o pacote loadtest diretamente.
+// The getActiveTests function is injected from main.go so that the health
+// package does not need to import the loadtest package directly.
 func RegisterRoutes(router *gin.Engine, getActiveTests activeTestsFunc) {
 	router.GET("/healthz", handleLiveness)
 	router.GET("/readyz", handleReadiness(getActiveTests))
 }
 
-// handleLiveness confirma que o processo está de pé, sem checar dependências.
+// handleLiveness confirms that the process is running without checking any
+// external dependencies.
 //
 //	@Summary	Liveness probe
 //	@Tags		health
@@ -35,8 +37,8 @@ func handleLiveness(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-// handleReadiness verifica se o serviço está apto a receber tráfego,
-// considerando o número de testes de carga rodando simultaneamente.
+// handleReadiness verifies whether the service is ready to receive traffic
+// based on the number of concurrently running load tests.
 //
 //	@Summary	Readiness probe
 //	@Tags		health
