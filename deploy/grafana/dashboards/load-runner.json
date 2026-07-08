@@ -17,7 +17,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "targets": [
         {
-          "expr": "rate(http_requests_total[1m])",
+          "expr": "rate(http_requests_total[5m])",
           "legendFormat": "{{method}} {{path}} ({{status}})",
           "refId": "A"
         }
@@ -31,7 +31,7 @@
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, path))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))",
           "legendFormat": "{{path}}",
           "refId": "A"
         }
