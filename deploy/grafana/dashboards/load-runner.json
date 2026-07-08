@@ -25,7 +25,7 @@
     },
     {
       "id": 2,
-      "title": "Latência p95 (s)",
+      "title": "P95 Latency (s)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
