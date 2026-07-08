@@ -1,6 +1,7 @@
 package loadtest
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,21 +20,21 @@ func TestRun_FiresRequestsAgainstTarget(t *testing.T) {
 		Duration:          500 * time.Millisecond,
 	}
 
-	result := Run(cfg)
+	result := Run(context.Background(), cfg)
 
-	if result.TotalRequests == 0 {
+	if result.TotalRequests.Load() == 0 {
 		t.Fatal("expected at least one request to be sent, but none were executed")
 	}
 
-	if result.Failed > 0 {
-		t.Errorf("expected zero failures against a healthy target, but got %d", result.Failed)
+	if result.Failed.Load() > 0 {
+		t.Errorf("expected zero failures against a healthy target, but got %d", result.Failed.Load())
 	}
 
-	if result.Successful != result.TotalRequests {
+	if result.Successful.Load() != result.TotalRequests.Load() {
 		t.Errorf(
 			"expected all requests to succeed: total=%d successful=%d",
-			result.TotalRequests,
-			result.Successful,
+			result.TotalRequests.Load(),
+			result.Successful.Load(),
 		)
 	}
 }
