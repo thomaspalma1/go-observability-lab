@@ -64,7 +64,7 @@ Native Go endpoints (**`/debug/pprof/*`**) exposed through **Gin**, allowing **C
 ## **How to run**
 
 ```yaml
-docker compose -f deploy/docker-compose.yml up --build
+docker compose -f deploy/docker-compose.yaml up --build
 ```
 
 | Service | URL |
@@ -115,7 +115,7 @@ A **CPU profile** captured during a sustained load test (**200 req/s**) showed t
 │   ├── health/                # liveness and readiness
 │   └── observability/         # logger, metrics, tracing, pprof
 └── deploy/
-├── docker-compose.yml
+├── docker-compose.yaml
 ├── prometheus/             # config + SLO/alert rules
 ├── alertmanager/
 └── grafana/                # datasource + dashboard provisioning
